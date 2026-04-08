@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Script de Atendimento — dōTERRA</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF7F2;
+    --warm: #F2EBE0;
+    --gold: #C8963E;
+    --gold-light: #E8C97A;
+    --brown: #6B4F35;
+    --brown-dark: #3D2B1A;
+    --green: #3A5C4A;
+    --green-light: #EAF2EC;
+    --text: #2C1F13;
+    --text-muted: #8C7060;
+    --white: #FFFFFF;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  html, body {
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  body { padding: 0 0 4rem; }
+
+  header {
+    background: var(--brown-dark);
+    padding: 1.25rem 1.25rem 1rem;
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 {
+    font-size: 15px; font-weight: 500; color: var(--gold-light);
+    letter-spacing: 0.02em;
+  }
+  header p { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+
+  .content { padding: 1rem 1rem 0; max-width: 620px; margin: 0 auto; }
+
+  .etapa {
+    background: var(--white);
+    border: 1.5px solid var(--warm);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .etapa-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 14px;
+    cursor: pointer;
+    user-select: none;
+    background: var(--warm);
+    transition: background 0.15s;
+  }
+  .etapa-header:active { background: #EAE0D0; }
+  .etapa-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500; flex-shrink: 0;
+  }
+  .n1 { background: #EAF3DE; color: #27500A; }
+  .n2 { background: #FAEEDA; color: #633806; }
+  .n3 { background: #E6F1FB; color: #0C447C; }
+  .n4 { background: #E1F5EE; color: #085041; }
+  .n5 { background: #FAECE7; color: #712B13; }
+  .etapa-info { flex: 1; }
+  .etapa-title { font-size: 14px; font-weight: 500; color: var(--brown-dark); }
+  .etapa-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .etapa-chevron {
+    font-size: 11px; color: var(--text-muted);
+    transition: transform 0.25s;
+  }
+  .etapa-chevron.open { transform: rotate(90deg); }
+
+  .etapa-body {
+    display: none;
+    padding: 14px;
+    border-top: 1.5px solid var(--warm);
+  }
+  .etapa-body.open { display: block; }
+
+  .msg-label {
+    font-size: 10px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 5px; margin-top: 12px;
+  }
+  .msg-label:first-child { margin-top: 0; }
+
+  .msg-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    margin-bottom: 6px;
+  }
+  .msg-bubble {
+    flex: 1;
+    background: var(--cream);
+    border: 1.5px solid var(--warm);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.65;
+    white-space: pre-wrap;
+  }
+  .copy-btn {
+    flex-shrink: 0;
+    background: var(--white);
+    border: 1.5px solid var(--warm);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 11px; font-weight: 500;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .copy-btn:active { background: var(--warm); }
+  .copy-btn.ok { color: var(--green); border-color: #9FE1CB; background: var(--green-light); }
+
+  .tip {
+    font-size: 12px; color: var(--text-muted);
+    border-left: 2px solid var(--gold-light);
+    padding: 6px 10px;
+    margin-top: 10px;
+    line-height: 1.6;
+    background: #FDF9F2;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  .variante-tag {
+    display: inline-flex; align-items: center;
+    font-size: 11px; font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-top: 14px; margin-bottom: 4px;
+  }
+  .vA { background: #E6F1FB; color: #0C447C; }
+  .vB { background: #FAEEDA; color: #633806; }
+  .vC { background: #FAEEDA; color: #633806; }
+  .vD { background: #EAF3DE; color: #27500A; }
+  .vOb { background: #FAECE7; color: #712B13; }
+
+  .divider {
+    height: 1px; background: var(--warm);
+    margin: 12px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌿 Script de Atendimento — dōTERRA</h1>
+  <p>Trafficfy · Metodologia DNA</p>
+</header>
+
+<div class="content">
+
+  <!-- ETAPA 1 -->
+  <div class="etapa">
+    <div class="etapa-header" onclick="toggle(this)">
+      <div class="etapa-num n1">1</div>
+      <div class="etapa-info">
+        <div class="etapa-title">Primeiro contato — abertura</div>
+        <div class="etapa-sub">Enviar assim que receber o lead no Telegram</div>
+      </div>
+      <div class="etapa-chevron">&#9654;</div>
+    </div>
+    <div class="etapa-body">
+      <div class="msg-label">Mensagem 1</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Oii [Nome], tudo bem? 😊</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+      <div class="msg-label">Mensagem 2</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Aqui é o Bryan! Vi que você acabou de preencher o nosso forms referente a estratégias de captação de leads pro WhatsApp com o seu negócio dōTERRA.</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+      <div class="msg-label">Mensagem 3</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Posso te apresentar aqui de forma rápida como funciona nossa metodologia DNA?</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+      <div class="tip">⏳ Aguarde a confirmação dela antes de avançar. Não envie mais nada antes da resposta.</div>
+    </div>
+  </div>
+
+  <!-- ETAPA 2 -->
+  <div class="etapa">
+    <div class="etapa-header" onclick="toggle(this)">
+      <div class="etapa-num n2">2</div>
+      <div class="etapa-info">
+        <div class="etapa-title">Diagnóstico rápido</div>
+        <div class="etapa-sub">Baseado na resposta dela no formulário</div>
+      </div>
+      <div class="etapa-chevron">&#9654;</div>
+    </div>
+    <div class="etapa-body">
+      <div class="tip">Use a variante correspondente à resposta dela no formulário sobre anúncios.</div>
+
+      <div class="variante-tag vA">Variante A — "Não sei o que são os anúncios"</div>
+      <div class="msg-label">Mensagem 1</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Antes de te apresentar a metodologia, queria te fazer uma pergunta rápida.</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+      <div class="msg-label">Mensagem 2</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Vi que você mencionou que ainda não conhece muito sobre anúncios nas redes sociais. Essa falta de contato com o assunto é mais por não ter sentido necessidade ainda, ou por achar que é algo muito complicado ou caro pra começar?</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="variante-tag vB">Variante B — "Sei o que é, mas nunca tive experiência"</div>
+      <div class="msg-label">Mensagem 1</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Antes de te apresentar a metodologia, queria entender melhor o seu momento.</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+      <div class="msg-label">Mensagem 2</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Vi que você sabe o que são os anúncios, mas ainda não teve experiência com eles. Essa não experiência foi mais por achar que precisa de muito investimento pra iniciar, ou por não saber bem como funciona na prática mesmo?</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="variante-tag vC">Variante C — "Tive experiência com impulsionamento"</div>
+      <div class="msg-label">Mensagem 1</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Antes de te apresentar a metodologia, queria entender melhor o que você já viveu.</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+      <div class="msg-label">Mensagem 2</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Vi que você já impulsionou posts por aqui. Como foi essa experiência? Sentiu que trouxe resultado de verdade ou pareceu que o dinheiro foi embora sem retorno claro?</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="variante-tag vD">Variante D — "Já tive experiência com agência ou gestor"</div>
+      <div class="msg-label">Mensagem 1</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Antes de te apresentar a metodologia, queria entender o que você já viveu.</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+      <div class="msg-label">Mensagem 2</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Vi que você já trabalhou com tráfego pago antes. O que fez você parar — foi o resultado que não veio, o suporte deixou a desejar, ou foi outra coisa?</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+
+      <div class="tip">👂 Escuta a resposta com atenção. O que ela disser aqui vai guiar toda a apresentação na etapa seguinte.</div>
+    </div>
+  </div>
+
+  <!-- ETAPA 3 -->
+  <div class="etapa">
+    <div class="etapa-header" onclick="toggle(this)">
+      <div class="etapa-num n3">3</div>
+      <div class="etapa-info">
+        <div class="etapa-title">Apresentação da solução</div>
+        <div class="etapa-sub">Mostrar o que você faz de forma simples</div>
+      </div>
+      <div class="etapa-chevron">&#9654;</div>
+    </div>
+    <div class="etapa-body">
+      <div class="msg-label">Mensagem 1</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Faz sentido então! É exatamente isso que a gente resolve com a metodologia DNA.</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+      <div class="msg-label">Mensagem 2</div>
+      <div class="msg-row">
+        <div class="msg-bubble">A ideia é simples: a gente cria anúncios no Instagram e Facebook voltados pra mulheres da sua cidade — que já têm interesse em saúde natural, bem-estar ou óleos essenciais. Essas pessoas chegam até você. Você não precisa mais ficar prospectando. 📲</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+      <div class="msg-label">Mensagem 3</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Com um investimento de R$17,00 por dia, dá pra gerar de 3 a 5 leads qualificados chegando no seu WhatsApp todos os dias. São pessoas reais, da sua cidade, que já demonstraram interesse. Você só precisa conversar. 🌿</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ETAPA 4 -->
+  <div class="etapa">
+    <div class="etapa-header" onclick="toggle(this)">
+      <div class="etapa-num n4">4</div>
+      <div class="etapa-info">
+        <div class="etapa-title">Contorno de objeções</div>
+        <div class="etapa-sub">Respostas para as dúvidas mais comuns</div>
+      </div>
+      <div class="etapa-chevron">&#9654;</div>
+    </div>
+    <div class="etapa-body">
+      <div class="variante-tag vOb">Objeção 1 — "Não entendo nada de anúncios"</div>
+      <div class="msg-label">Mensagem</div>
+      <div class="msg-row">
+        <div class="msg-bubble">E não precisa entender! Essa é exatamente a minha parte. Você cuida do seu negócio dōTERRA, eu cuido de fazer as pessoas certas chegarem até você. É uma parceria. 😊</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="variante-tag vOb">Objeção 2 — "Já impulsionei post e não funcionou"</div>
+      <div class="msg-label">Mensagem</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Impulsionamento é bem diferente de tráfego estratégico. Impulsionar é como gritar na rua — você não escolhe pra quem. Com campanha bem estruturada, a gente define exatamente o perfil de quem vai ver: mulheres, na sua cidade, com interesse em saúde e bem-estar. É outra conversa. 🎯</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="variante-tag vOb">Objeção 3 — "Não sei se tenho R$510/mês agora"</div>
+      <div class="msg-label">Mensagem</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Entendo, é uma dúvida válida. Mas pensa comigo: se em 30 dias você fechar 2 ou 3 pessoas novas que você nunca encontraria por indicação, esse investimento já se paga com folga. A questão é se faz sentido pra onde você quer ir com a dōTERRA. O que você acha?</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="variante-tag vOb">Objeção 4 — "Já trabalhei com gestor e não tive resultado"</div>
+      <div class="msg-label">Mensagem</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Faz sentido ter essa resistência. A diferença é que a metodologia DNA foi pensada especificamente pro nicho dōTERRA — não é uma estratégia genérica. A gente já sabe o perfil de quem compra, como falar com essa pessoa e o que converte nesse mercado. Posso te mostrar como funciona na prática?</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ETAPA 5 -->
+  <div class="etapa">
+    <div class="etapa-header" onclick="toggle(this)">
+      <div class="etapa-num n5">5</div>
+      <div class="etapa-info">
+        <div class="etapa-title">Fechamento — próximo passo</div>
+        <div class="etapa-sub">Direcionar para a call ou decisão</div>
+      </div>
+      <div class="etapa-chevron">&#9654;</div>
+    </div>
+    <div class="etapa-body">
+      <div class="msg-label">Mensagem 1</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Que tal a gente fazer uma conversa rápida de 20 minutinhos? Sem compromisso nenhum. 😊</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+      <div class="msg-label">Mensagem 2</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Quero entender melhor o seu momento com a dōTERRA e te mostrar exatamente como montaria a estratégia pra você — aí você decide com mais clareza se faz sentido. Você teria disponibilidade essa semana?</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+
+      <div class="tip">Se ela topar a call — você fecha lá. Se preferir decidir pelo WhatsApp, use as mensagens abaixo.</div>
+
+      <div class="divider"></div>
+
+      <div class="msg-label">Fechamento direto — Mensagem 1</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Se quiser já iniciar, o processo é simples: a gente assina um contrato mensal, eu faço o diagnóstico do seu perfil e da sua região e monto as campanhas.</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+      <div class="msg-label">Fechamento direto — Mensagem 2</div>
+      <div class="msg-row">
+        <div class="msg-bubble">Em até 7 dias os primeiros leads já chegam pra você. 🌿 Posso te passar os detalhes?</div>
+        <button class="copy-btn" onclick="copiar(this)">Copiar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.etapa-chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+}
+
+function copiar(btn) {
+  const bubble = btn.previousElementSibling;
+  const text = bubble.innerText.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Ok';
+    btn.classList.add('ok');
+    setTimeout(() => {
+      btn.textContent = 'Copiar';
+      btn.classList.remove('ok');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>
